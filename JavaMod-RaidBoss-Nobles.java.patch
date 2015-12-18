@@ -1,0 +1,76 @@
+Index: L2RaidBossInstance.java
+===================================================================
+--- L2RaidBossInstance.java	(revision 0)
++++ L2RaidBossInstance.java	(working copy)
+@@ -0,0 +1,198 @@
+import com.guardian.gameserver.templates.L2NpcTemplate;
+import com.guardian.gameserver.thread.ThreadPoolManager;
++import com.guardian.gameserver.network.serverpackets.SocialAction;
+import com.guardian.util.random.Rnd;
+
+			SystemMessage msg = new SystemMessage(SystemMessageId.RAID_WAS_SUCCESSFUL);
+			broadcastPacket(msg);
+			msg = null;
+			if (player.getParty() != null)
+			{
++				if(Config.ENABLE_RAIDBOSS_NOBLES)
++				{
++				for(L2PcInstance newNoble : player.getParty().getPartyMembers())
++				 {
++				 if (getNpcId() == Config.RAIDBOSS_NOBLES_ID && !newNoble.isNoble())
++				  {
++			     newNoble.broadcastPacket(new SocialAction(newNoble.getObjectId(), 16));
++				 newNoble.setNoble(true);
++				 newNoble.sendMessage("Voce e um Nobre agora, ganhou Status e Skills de Nobre, Parabens!");
++				 newNoble.getInventory().addItem("Nobles Circlets", 38, 1, newNoble, null);
++				  }
++				 }
++			    }
+				for (final L2PcInstance member : player.getParty().getPartyMembers())
+				{
+
+Index: Config.java
+===================================================================
+--- Config.java	(revision 0)
++++ Config.java	(working copy)
+
+	public static String ADD_CHAR_TITLE;
++	public static boolean ENABLE_RAIDBOSS_NOBLES;
++	public static int RAIDBOSS_NOBLES_ID;
+	public static boolean NOBLE_CUSTOM_ITEMS;
+
+
+			ADD_CHAR_TITLE = L2JGuardianSettings.getProperty("CharAddTitle", "Welcome");
++			
++			ENABLE_RAIDBOSS_NOBLES = Boolean.parseBoolean(L2JGuardianSettings.getProperty("RaidBossNobles", "false"));
++			RAIDBOSS_NOBLES_ID = Integer.parseInt(L2JGuardianSettings.getProperty("RaidBossNoblesId", "25325"));
+			NOBLE_CUSTOM_ITEMS = Boolean.parseBoolean(L2JGuardianSettings.getProperty("EnableNobleCustomItem", "true"));
+			NOOBLE_CUSTOM_ITEM_ID = Integer.parseInt(L2JGuardianSettings.getProperty("NoobleCustomItemId", "6673"));
+
+Index: l2jguardian.properties
+===================================================================
+--- l2jguardian.properties	(revision 0)
++++ l2jguardian.properties	(working copy)
+
+# Gm Spawn gets deleted on custom_spawnlist Table?
+DeleteGmSpawnOnCustom = False
++
++# -----------------------------------------------------
++# Nobles ao Matar RaidBoss -
++# -----------------------------------------------------
++# Ativa ou Desativa o Mod Nobles ao matar RaidBoss.
++# Default: False
++RaidBossNobles = True
++# ID do RaidBoss que vai dar Status Nobles.
++# Ex: 25325 (Barakiel) - Ao matar o Barakiel
++# Os players da PT vao ganhar Status Nobles.
++# ATENÇÃO: Só Funciona com RaidBoss.
++RaidBossNoblesId = 25325
++
+# -------------------------------------------------------
+# Noble Custom Item Configuration -
+# -------------------------------------------------------
+# When ActiveChar will use this item will gain Noble Status.
+EnableNobleCustomItem = False
+# Id Itemn Need's
+NoobleCustomItemId = 6673
