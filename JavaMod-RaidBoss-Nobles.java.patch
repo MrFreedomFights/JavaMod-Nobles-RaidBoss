@@ -1,35 +1,34 @@
-Index: L2RaidBossInstance.java
+Index: com/guardian/gameserver/model/actor/instance/L2RaidBossInstance.java
 ===================================================================
---- L2RaidBossInstance.java	(revision 0)
-+++ L2RaidBossInstance.java	(working copy)
+--- com/guardian/gameserver/model/actor/instance/L2RaidBossInstance.java    (revision 0)
++++ com/guardian/gameserver/model/actor/instance/L2RaidBossInstance.java    (working copy)
 @@ -0,0 +1,198 @@
 import com.guardian.gameserver.templates.L2NpcTemplate;
 import com.guardian.gameserver.thread.ThreadPoolManager;
 +import com.guardian.gameserver.network.serverpackets.SocialAction;
 import com.guardian.util.random.Rnd;
 
-			SystemMessage msg = new SystemMessage(SystemMessageId.RAID_WAS_SUCCESSFUL);
-			broadcastPacket(msg);
-			msg = null;
-			if (player.getParty() != null)
-			{
-+				if(Config.ENABLE_RAIDBOSS_NOBLES)
-+				{
-+				for(L2PcInstance newNoble : player.getParty().getPartyMembers())
-+				 {
-+				 if (getNpcId() == Config.RAIDBOSS_NOBLES_ID && !newNoble.isNoble())
-+				  {
-+			     newNoble.broadcastPacket(new SocialAction(newNoble.getObjectId(), 16));
-+				 newNoble.setNoble(true);
-+				 newNoble.sendMessage("Voce e um Nobre agora, ganhou Status e Skills de Nobre, Parabens!");
-+				 newNoble.getInventory().addItem("Nobles Circlets", 38, 1, newNoble, null);
-+				  }
-+				 }
-+			    }
-				for (final L2PcInstance member : player.getParty().getPartyMembers())
-				{
+            SystemMessage msg = new SystemMessage(SystemMessageId.RAID_WAS_SUCCESSFUL);
+            broadcastPacket(msg);
+            msg = null;
+            if (player.getParty() != null)
+            {
+                for (final L2PcInstance member : player.getParty().getPartyMembers())
+                {
++                  if(Config.ENABLE_RAIDBOSS_NOBLES)
++                   {
++                   if (getNpcId() == Config.RAIDBOSS_NOBLES_ID && !member.isNoble())
++                    {
++                     member.broadcastPacket(new SocialAction(member.getObjectId(), 16));
++                     member.setNoble(true);
++                     member.sendMessage("Voce e um Nobre agora, ganhou Status e Skills de Nobre, Parabens!");
++                     member.getInventory().addItem("Nobles Circlets", 38, 1, member, null);
++                    }
++                   }
+                    RaidBossPointsManager.addPoints(member, getNpcId(), (getLevel() / 2) + Rnd.get(-5, 5));
+                }
 
-Index: Config.java
+Index: com/guardian/Config.java
 ===================================================================
 --- Config.java	(revision 0)
 +++ Config.java	(working copy)
@@ -47,7 +46,7 @@ Index: Config.java
 			NOBLE_CUSTOM_ITEMS = Boolean.parseBoolean(L2JGuardianSettings.getProperty("EnableNobleCustomItem", "true"));
 			NOOBLE_CUSTOM_ITEM_ID = Integer.parseInt(L2JGuardianSettings.getProperty("NoobleCustomItemId", "6673"));
 
-Index: l2jguardian.properties
+Index: config/functions/l2jguardian.properties
 ===================================================================
 --- l2jguardian.properties	(revision 0)
 +++ l2jguardian.properties	(working copy)
@@ -64,7 +63,7 @@ DeleteGmSpawnOnCustom = False
 +# ID do RaidBoss que vai dar Status Nobles.
 +# Ex: 25325 (Barakiel) - Ao matar o Barakiel
 +# Os players da PT vao ganhar Status Nobles.
-+# ATEN«√O: SÛ Funciona com RaidBoss.
++# ATEN√á√ÉO: S√≥ Funciona com RaidBoss.
 +RaidBossNoblesId = 25325
 +
 # -------------------------------------------------------
